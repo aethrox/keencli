@@ -1,4 +1,4 @@
-// Keenetic syslog'unu LLM için süzer (~2789 → ~66 satır).
+// Keenetic syslog'unu LLM için süzer (~3000 → ~60 satır).
 //
 // Çıkarılanlar: kernel boot gürültüsü, driver spam, ilk WAN olayından önceki provisioning
 // Tutulanlar: PPPoE, Modem hangup, ping-check, port 0/1 link, IP/route/DNS değişimleri, [E]/[C]

@@ -6,7 +6,7 @@ mod api; // Router HTTP istekleri (login, veri çekme)
 mod config; // config.toml okuma
 mod credentials; // Şifre ve API key kontrolleri
 mod llm; // OpenRouter AI çağrıları
-mod log_filter; // Log süzme (2789 → ~66 satır)
+mod log_filter; // Log süzme (~3000 → ~60 satır)
 mod mask; // IP, MAC, SSID maskeleme
 mod output; // Çekilen veriyi dosyaya yazma
 mod prompt; // AI prompt üretimi
@@ -53,9 +53,10 @@ enum Commands {
     #[command(
         about = "Router'dan veri çeker",
         long_about = "\
-Router'a bağlanır, veriyi outputs/TARİH/ altına kaydeder.\n\n\
+Router'a bağlanır, veriyi outputs/TARİH/ altına kaydeder.\n\
+outputs/ klasörü yoksa otomatik oluşturulur.\n\n\
   fetch       system.json\n\
-  fetch -a    tüm dosyalar\n\n\
+  fetch -a    tüm dosyalar (analyze için gerekli)\n\n\
 Dosyalar (-a):\n\
   system.json  interface_PPPoE0.json  pingcheck.json\n\
   log.txt      wifi.json              mesh.json",
@@ -76,10 +77,11 @@ Seçenekler:\n\
     #[command(
         about = "Kayıtlı veriyi analiz eder",
         long_about = "\
-outputs/ içindeki en son fetch klasörünü kullanır.\n\n\
+outputs/ içindeki en son fetch klasörünü kullanır.\n\
+Klasör yoksa oluşturulur; fetch verisi yoksa hata verir.\n\n\
 Ne yapar:\n\
-  1. Kayıtlı verileri okur ve log'u süzer\n\
-  2. prompt_for_ai.txt üretir\n\
+  1. Kayıtlı verileri okur, log'u süzer (~3000 → ~60 satır)\n\
+  2. IP/MAC/SSID maskeler, prompt_for_ai.txt üretir\n\
   3. API key varsa OpenRouter ile AI raporu yazar\n\n\
 Girdi (fetch -a ile oluşmuş olmalı):\n\
   system.json  interface_PPPoE0.json  pingcheck.json\n\
