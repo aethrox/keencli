@@ -17,11 +17,21 @@ use clap::{Parser, Subcommand};
 use tokio::fs;
 
 const SETUP_HELP: &str = "\
-Kurulum\n  \
-Kurulu: ~/.config/keencli/config.toml + .env\n  \
-Geliştirme: ./config.toml + .env\n  \
-Şifre: KEENETIC_PASSWORD (config.toml'a yazmayın)\n\n\
-Detay için: keencli <komut> --help\n";
+\n\
+Yapılandırma\n\
+\n\
+[Kurulum — install.sh sonrası]\n\
+- config  ~/.config/keencli/config.toml\n\
+- şifre   ~/.config/keencli/.env\n\
+- veri    ~/.local/share/keencli/outputs/\n\
+\n\
+[Geliştirme — repo içinden]\n\
+- config  ./config.toml\n\
+- şifre   ./.env\n\
+- veri    ./outputs/\n\
+\n\
+Şifreyi config.toml dosyasına yazmayın.\n\
+Komut ayrıntısı: keencli <komut> --help\n";
 
 #[derive(Parser)]
 #[command(
@@ -33,8 +43,11 @@ Keenetic router'dan veri çeker, outputs/ klasörüne kaydeder ve analiz eder.",
     after_help = SETUP_HELP,
     help_template = "\
 {version} — {about-with-newline}\n\
-Kullanım: {usage}\n\n\
+\n\
+Kullanım: {usage}\n\
+\n\
 {subcommands}\n\
+\n\
 Seçenekler:\n\
 {options}{after-help}\
 ",
@@ -55,16 +68,28 @@ enum Commands {
     #[command(
         about = "Router'dan veri çeker",
         long_about = "\
-Router'a bağlanır, veriyi outputs/TARİH/ altına kaydeder.\n\
-outputs/ klasörü yoksa otomatik oluşturulur.\n\n\
-  fetch       system.json\n\
-  fetch -a    tüm dosyalar (analyze için gerekli)\n\n\
-Dosyalar (-a):\n\
-  system.json  interface_PPPoE0.json  pingcheck.json\n\
-  log.txt      wifi.json              mesh.json",
+Router'a bağlanır ve veriyi zaman damgalı klasöre kaydeder.\n\
+\n\
+[Kullanım]\n\
+- keencli fetch      → system.json\n\
+- keencli fetch -a   → analyze için tüm dosyalar\n\
+\n\
+[fetch -a dosyaları]\n\
+- system.json\n\
+- interface_PPPoE0.json\n\
+- pingcheck.json\n\
+- log.txt\n\
+- wifi.json\n\
+- mesh.json\n\
+\n\
+[Çıktı konumu]\n\
+- Kurulum:    ~/.local/share/keencli/outputs/TARİH-SAAT/\n\
+- Geliştirme: ./outputs/TARİH-SAAT/",
         help_template = "\
 {about-with-newline}\n\
-Kullanım: {usage}\n\n\
+\n\
+Kullanım: {usage}\n\
+\n\
 Seçenekler:\n\
 {options}\
 "
@@ -79,29 +104,36 @@ Seçenekler:\n\
     #[command(
         about = "Kayıtlı veriyi analiz eder",
         long_about = "\
-outputs/ içindeki en son fetch klasörünü kullanır.\n\
-Klasör yoksa oluşturulur; fetch verisi yoksa hata verir.\n\n\
-Ne yapar:\n\
-  1. Kayıtlı verileri okur, log'u süzer (~3000 → ~60 satır)\n\
-  2. IP/MAC/SSID maskeler, prompt_for_ai.txt üretir\n\
-  3. API key varsa OpenRouter ile AI raporu yazar\n\n\
-Girdi (fetch -a ile oluşmuş olmalı):\n\
-  system.json  interface_PPPoE0.json  pingcheck.json\n\
-  log.txt      wifi.json              mesh.json\n\n\
-Çıktı:\n\
-  prompt_for_ai.txt              her zaman\n\
-  ai_report_MODEL.md             API key varsa\n\n\
-Ortam değişkenleri (opsiyonel):\n\
-  OPENROUTER_API_KEY   OpenRouter API anahtarı\n\
-  LLM_MODEL            örn. anthropic/claude-sonnet-4.6\n\n\
-Örnek:\n\
-  keencli fetch -a\n\
-  export OPENROUTER_API_KEY='...'\n\
-  export LLM_MODEL='anthropic/claude-sonnet-4.6'\n\
-  keencli analyze",
+En son fetch klasöründeki kayıtlı veriyi analiz eder.\n\
+Fetch verisi yoksa hata verir.\n\
+\n\
+[Adımlar]\n\
+1. Kayıtlı verileri okur, log'u süzer (~3000 → ~60 satır)\n\
+2. IP/MAC/SSID maskeler, prompt_for_ai.txt üretir\n\
+3. API key varsa OpenRouter ile AI raporu yazar\n\
+\n\
+[Girdi — fetch -a ile oluşmuş olmalı]\n\
+- system.json, interface_PPPoE0.json, pingcheck.json\n\
+- log.txt, wifi.json, mesh.json\n\
+\n\
+[Çıktı]\n\
+- prompt_for_ai.txt   (her zaman)\n\
+- ai_report_MODEL.md  (API key varsa)\n\
+\n\
+[AI — opsiyonel ortam değişkenleri]\n\
+- OPENROUTER_API_KEY\n\
+- LLM_MODEL  (örn. anthropic/claude-sonnet-4.6)\n\
+\n\
+[Örnek akış]\n\
+keencli fetch -a\n\
+export OPENROUTER_API_KEY='...'\n\
+export LLM_MODEL='anthropic/claude-sonnet-4.6'\n\
+keencli analyze",
         help_template = "\
 {about-with-newline}\n\
-Kullanım: {usage}\n\n\
+\n\
+Kullanım: {usage}\n\
+\n\
 Seçenekler:\n\
 {options}\
 "
@@ -111,10 +143,20 @@ Seçenekler:\n\
     /// Canlı router durumu (hostname, uptime, PPPoE)
     #[command(
         about = "Canlı router durumu",
-        long_about = "Router'a bağlanır; hostname, uptime ve PPPoE durumunu gösterir.",
+        long_about = "\
+Router'a bağlanır ve özet durum gösterir. Veri kaydetmez.\n\
+\n\
+[Gösterilen bilgiler]\n\
+- hostname\n\
+- uptime\n\
+- PPPoE bağlantı durumu\n\
+\n\
+Bağlantı testi için kullanışlıdır.",
         help_template = "\
 {about-with-newline}\n\
-Kullanım: {usage}\n\n\
+\n\
+Kullanım: {usage}\n\
+\n\
 Seçenekler:\n\
 {options}\
 "

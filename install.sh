@@ -8,91 +8,127 @@ CONFIG_DIR="${HOME}/.config/keencli"
 DATA_DIR="${HOME}/.local/share/keencli"
 SRC_DIR="${KEENETIC_SRC_DIR:-${DATA_DIR}/src}"
 
-echo "==> keencli kurulumu"
+rule() {
+    echo "────────────────────────────────────────────────"
+}
+
+heading() {
+    echo ""
+    rule
+    echo "  $1"
+    rule
+    echo ""
+}
+
+step() {
+    printf "  %s) %s\n" "$1" "$2"
+}
+
+cmd() {
+    echo "     $1"
+}
+
+echo ""
+echo "  keencli kurulumu"
 echo ""
 
 if ! command -v cargo >/dev/null 2>&1; then
-    echo "Hata: cargo bulunamadı."
-    echo "Rust kur: https://rustup.rs"
+    echo "  Hata: cargo bulunamadı."
+    echo "  Rust kurulumu: https://rustup.rs"
     exit 1
 fi
 
 if ! command -v git >/dev/null 2>&1; then
-    echo "Hata: git bulunamadı."
+    echo "  Hata: git bulunamadı."
     exit 1
 fi
 
 mkdir -p "$BIN_DIR" "$CONFIG_DIR" "$DATA_DIR/outputs"
 
 if [[ -d "$SRC_DIR/.git" ]]; then
-    echo "==> Kaynak güncelleniyor: $SRC_DIR"
+    echo "  >> Kaynak güncelleniyor"
+    echo "     $SRC_DIR"
     git -C "$SRC_DIR" pull --ff-only
 else
-    echo "==> Kaynak indiriliyor: $SRC_DIR"
+    echo "  >> Kaynak indiriliyor"
+    echo "     $SRC_DIR"
     mkdir -p "$(dirname "$SRC_DIR")"
     git clone "$REPO_URL" "$SRC_DIR"
 fi
 
-echo "==> Derleniyor (release)..."
+echo ""
+echo "  >> Derleniyor (release)..."
 cargo build --release --manifest-path "$SRC_DIR/Cargo.toml"
 
 install -m 755 "$SRC_DIR/target/release/keencli" "$BIN_DIR/keencli"
 
 if [[ ! -f "$CONFIG_DIR/config.toml" ]]; then
     cp "$SRC_DIR/config.toml.example" "$CONFIG_DIR/config.toml"
-    echo "==> Örnek config oluşturuldu: $CONFIG_DIR/config.toml"
+    echo "  >> Örnek config oluşturuldu"
+    echo "     $CONFIG_DIR/config.toml"
 fi
 
 if [[ ! -f "$CONFIG_DIR/.env.example" ]]; then
     cp "$SRC_DIR/.env.example" "$CONFIG_DIR/.env.example"
 fi
 
+heading "Kurulum tamamlandı"
+
+echo "  Dosyalar"
 echo ""
-echo "============================================"
-echo "  Kurulum tamamlandı"
-echo "============================================"
-echo ""
-echo "  Binary:  $BIN_DIR/keencli"
-echo "  Config:  $CONFIG_DIR/config.toml"
-echo "  Şifre:   $CONFIG_DIR/.env  (henüz yoksa oluştur)"
-echo "  Veri:    $DATA_DIR/outputs/"
+printf "    %-10s %s\n" "Binary" "$BIN_DIR/keencli"
+printf "    %-10s %s\n" "Config" "$CONFIG_DIR/config.toml"
+printf "    %-10s %s\n" "Şifre" "$CONFIG_DIR/.env"
+printf "    %-10s %s\n" "Veri" "$DATA_DIR/outputs/"
 echo ""
 
 if [[ ":${PATH}:" != *":${BIN_DIR}:"* ]]; then
-    echo "!! PATH uyarısı"
-    echo "   $BIN_DIR şu an PATH'te değil. Shell profiline ekle"
-    echo "   (~/.bashrc veya ~/.zshrc), sonra yeni terminal aç:"
+    heading "PATH uyarısı"
+    echo "  $BIN_DIR şu an PATH'te değil."
+    echo "  ~/.bashrc veya ~/.zshrc dosyana ekle, sonra yeni terminal aç:"
     echo ""
-    echo '   export PATH="$HOME/.local/bin:$PATH"'
+    cmd 'export PATH="$HOME/.local/bin:$PATH"'
     echo ""
 fi
 
-echo "--------------------------------------------"
-echo "  Kurulum sonrası (ilk kullanım)"
-echo "--------------------------------------------"
+heading "İlk kullanım"
+
+step 1 "Router bilgilerini ayarla (şifre yazma)"
+cmd "${EDITOR:-nano} $CONFIG_DIR/config.toml"
 echo ""
-echo "1) Router bilgilerini ayarla:"
-echo "   $EDITOR $CONFIG_DIR/config.toml"
-echo "   (ip ve username — şifreyi bu dosyaya YAZMAYIN)"
+
+step 2 "Router şifresini kalıcı olarak tanımla"
+cmd "cp $CONFIG_DIR/.env.example $CONFIG_DIR/.env"
+cmd "${EDITOR:-nano} $CONFIG_DIR/.env"
 echo ""
-echo "2) Router şifresini kalıcı olarak tanımla:"
-echo "   cp $CONFIG_DIR/.env.example $CONFIG_DIR/.env"
-echo "   $EDITOR $CONFIG_DIR/.env"
+echo "     Geçici alternatif (yalnızca bu terminal):"
+cmd "export KEENETIC_PASSWORD='router_şifreniz'"
 echo ""
-echo "   Alternatif (geçici, yalnızca o terminal için):"
-echo "   export KEENETIC_PASSWORD='router_şifreniz'"
+
+step 3 "Bağlantıyı test et"
+cmd "keencli status"
 echo ""
-echo "3) Bağlantıyı test et:"
-echo "   keencli status"
+
+step 4 "Veri çek ve analiz et"
+cmd "keencli fetch -a"
+cmd "keencli analyze"
 echo ""
-echo "4) Veri çek ve analiz et:"
-echo "   keencli fetch -a"
-echo "   keencli analyze"
+
+echo "  Opsiyonel — AI raporu için .env dosyasına ekle:"
 echo ""
-echo "Opsiyonel — AI raporu için $CONFIG_DIR/.env dosyasına ekle:"
-echo "   OPENROUTER_API_KEY=sk-or-..."
-echo "   LLM_MODEL=anthropic/claude-sonnet-4.6"
+cmd "OPENROUTER_API_KEY=sk-or-..."
+cmd "LLM_MODEL=anthropic/claude-sonnet-4.6"
 echo ""
-echo "Güncelleme: install.sh script'ini tekrar çalıştır."
-echo "Detay: https://github.com/aethrox/keencli#kurulum-sonrası"
+
+heading "Diğer"
+
+echo "  Güncelleme"
+cmd "curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/install.sh | bash"
+echo ""
+echo "  Kaldırma"
+cmd "curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/uninstall.sh -o uninstall.sh"
+cmd "bash uninstall.sh"
+echo ""
+echo "  Belgeler"
+cmd "https://github.com/aethrox/keencli#kurulum-sonrası"
 echo ""

@@ -2,7 +2,7 @@
 
 Keenetic router'dan tanı verisi toplayan, kaydeden ve isteğe bağlı AI ile analiz eden komut satırı aracı.
 
-**Sürüm:** 1.0.2 · **Repo:** https://github.com/aethrox/keencli
+**Sürüm:** 1.0.3 · **Repo:** https://github.com/aethrox/keencli
 
 ## Hedef
 
@@ -81,62 +81,69 @@ Kurulum script'i bitince config, şifre ve ilk kullanım adımlarını ekranda g
 
 ### Kurulum sonrası
 
-Kurulumdan sonra şu dosyalar kullanılır:
-
-| Dosya | Açıklama |
-|-------|----------|
+| Dosya | Ne için |
+|-------|---------|
 | `~/.config/keencli/config.toml` | Router IP ve kullanıcı adı |
-| `~/.config/keencli/.env` | Router şifresi (ve opsiyonel AI anahtarları) |
+| `~/.config/keencli/.env` | Router şifresi, AI anahtarları |
 | `~/.local/share/keencli/outputs/` | Fetch ve analiz çıktıları |
 
-**1. Config düzenle** — şifre yazmayın:
+**1 — Config** (`ip`, `username`; şifre yazma):
 
 ```bash
 nano ~/.config/keencli/config.toml
 ```
 
-**2. Şifreyi tanımla** — önerilen yol (her terminalde geçerli):
+**2 — Şifre** (kalıcı, önerilen):
 
 ```bash
 cp ~/.config/keencli/.env.example ~/.config/keencli/.env
 nano ~/.config/keencli/.env
 ```
 
-`.env` içeriği örneği:
-
-```
+```env
 KEENETIC_PASSWORD=router_şifreniz
 ```
 
-Geçici alternatif: `export KEENETIC_PASSWORD='...'` (yalnızca o shell oturumu).
+Geçici: `export KEENETIC_PASSWORD='...'` (yalnızca o terminal).
 
-**3. Bağlantıyı test et:**
+**3 — Test:**
 
 ```bash
 keencli status
 ```
 
-**4. Veri çek ve analiz et:**
+**4 — Kullanım:**
 
 ```bash
 keencli fetch -a
 keencli analyze
 ```
 
-**5. (Opsiyonel) AI raporu** — `.env` dosyasına ekle:
+**5 — AI (opsiyonel)** — `.env` dosyasına ekle:
 
-```
+```env
 OPENROUTER_API_KEY=sk-or-...
 LLM_MODEL=anthropic/claude-sonnet-4.6
 ```
 
-`~/.local/bin` PATH'te değilse shell profiline ekle ve yeni terminal aç:
+PATH gerekirse (`~/.bashrc` / `~/.zshrc`):
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-**Güncelleme:** Kurulum script'ini tekrar çalıştır (`curl ... | bash` veya `./install.sh`).
+**Güncelleme:** `install.sh` script'ini tekrar çalıştır.
+
+### Kaldırma
+
+Tamamen etkileşimli — binary, config ve veri için ayrı onay; varsayılan yanıt hayır.
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/uninstall.sh -o uninstall.sh
+bash uninstall.sh
+```
+
+`curl | bash` çalışmaz; önce indirip terminalden çalıştır. Yanlışlıkla silmeyi önlemek için kasıtlıdır.
 
 ### Manuel (geliştirme)
 
