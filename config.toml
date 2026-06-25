@@ -1,3 +1,0 @@
-ip = "192.168.1.1"
-username = "admin"
-# Şifre environment variable'dan okunacak (KEENETIC_PASSWORD)

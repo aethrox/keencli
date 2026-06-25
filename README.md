@@ -2,7 +2,7 @@
 
 Keenetic router'dan tanı verisi toplayan, kaydeden ve isteğe bağlı AI ile analiz eden komut satırı aracı.
 
-**Sürüm:** 1.0.0 · **Repo:** https://github.com/aethrox/keencli
+**Sürüm:** 1.0.1 · **Repo:** https://github.com/aethrox/keencli
 
 ## Hedef
 
@@ -162,4 +162,4 @@ src/
 
 ## Lisans
 
-Kişisel proje — Kaan (Aethrox) Demirel
+MIT — bkz. [LICENSE](LICENSE)

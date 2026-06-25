@@ -264,10 +264,10 @@ fn should_keep(line: &str, parsed: Option<&ParsedLine<'_>>) -> bool {
         return true;
     }
 
-    if let Some(parsed) = parsed {
-        if parsed.level == "E" || parsed.level == "C" {
-            return true;
-        }
+    if let Some(parsed) = parsed
+        && (parsed.level == "E" || parsed.level == "C")
+    {
+        return true;
     }
 
     false

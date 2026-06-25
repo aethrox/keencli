@@ -42,7 +42,7 @@ Seçenekler:\n\
     disable_help_subcommand = true,
     disable_version_flag = false,
 )]
-struct CLI {
+struct Cli {
     #[command(subcommand)]
     command: Commands,
 }
@@ -229,7 +229,7 @@ async fn run_status() -> anyhow::Result<()> {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv::dotenv().ok();
-    let cli = CLI::parse(); // terminalde yazdığın komutu okur (fetch, analyze, status)
+    let cli = Cli::parse(); // terminalde yazdığın komutu okur (fetch, analyze, status)
 
     match cli.command {
         Commands::Fetch { all } => run_fetch(all).await?,

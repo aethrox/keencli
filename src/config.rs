@@ -23,15 +23,15 @@ pub fn load() -> Result<RouterConfig> {
         .try_deserialize()
         .context("config.toml formatı hatalı. 'ip' ve 'username' alanları gerekli.")?;
 
-    if let Ok(ip) = std::env::var("KEENETIC_IP") {
-        if !ip.trim().is_empty() {
-            config.ip = ip;
-        }
+    if let Ok(ip) = std::env::var("KEENETIC_IP")
+        && !ip.trim().is_empty()
+    {
+        config.ip = ip;
     }
-    if let Ok(username) = std::env::var("KEENETIC_USERNAME") {
-        if !username.trim().is_empty() {
-            config.username = username;
-        }
+    if let Ok(username) = std::env::var("KEENETIC_USERNAME")
+        && !username.trim().is_empty()
+    {
+        config.username = username;
     }
 
     if config.ip.trim().is_empty() {

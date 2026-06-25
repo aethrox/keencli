@@ -69,7 +69,7 @@ impl ApiClient {
         let md5_hash = format!("{:x}", md5::compute(&step1));
         // Adım 2: sha256(challenge + md5_hash)
         let step2 = format!("{challenge}{md5_hash}");
-        let password_hash = hex_hash(&Sha256::digest(step2));
+        let password_hash = hex_hash(Sha256::digest(step2));
 
         let resp = self
             .client
