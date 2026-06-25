@@ -2,7 +2,7 @@
 
 Keenetic router'dan tanı verisi toplayan, kaydeden ve isteğe bağlı AI ile analiz eden komut satırı aracı.
 
-**Sürüm:** 1.0.1 · **Repo:** https://github.com/aethrox/keencli
+**Sürüm:** 1.0.2 · **Repo:** https://github.com/aethrox/keencli
 
 ## Hedef
 
@@ -34,7 +34,7 @@ Router arayüzüne girmeden şunları yapmak için:
 - Logları süzüp AI'ya uygun prompt üretmek
 - OpenRouter üzerinden tanı raporu almak
 
-Veriler `outputs/TARİH-SAAT/` altına kaydedilir; router'a tekrar bağlanmadan analiz edilebilir. `outputs/` yoksa `fetch` veya `analyze` sırasında otomatik oluşturulur.
+Veriler `outputs/TARİH-SAAT/` altına kaydedilir (kurulum sonrası: `~/.local/share/keencli/outputs/`); router'a tekrar bağlanmadan analiz edilebilir. `outputs/` yoksa `fetch` veya `analyze` sırasında otomatik oluşturulur.
 
 ## Nasıl çalışır?
 
@@ -52,6 +52,94 @@ keencli analyze           Log süzme → maskeleme → prompt → (opsiyonel) AI
 
 **Gereksinimler:** Rust (edition 2024), router ile aynı ağ.
 
+### Tek komut (önerilen)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/install.sh | bash
+```
+
+Script şunları yapar:
+
+- Kaynağı `~/.local/share/keencli/src` altına indirir ve derler
+- Binary'yi `~/.local/bin/keencli` konumuna kurar
+- Örnek config'i `~/.config/keencli/config.toml` olarak oluşturur
+- Fetch çıktıları `~/.local/share/keencli/outputs/` altına yazılır
+
+`~/.local/bin` PATH'te değilse script uyarı verir; shell profiline ekleyin:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Yerel script ile kurulum:
+
+```bash
+./install.sh
+```
+
+Kurulum script'i bitince config, şifre ve ilk kullanım adımlarını ekranda gösterir.
+
+### Kurulum sonrası
+
+Kurulumdan sonra şu dosyalar kullanılır:
+
+| Dosya | Açıklama |
+|-------|----------|
+| `~/.config/keencli/config.toml` | Router IP ve kullanıcı adı |
+| `~/.config/keencli/.env` | Router şifresi (ve opsiyonel AI anahtarları) |
+| `~/.local/share/keencli/outputs/` | Fetch ve analiz çıktıları |
+
+**1. Config düzenle** — şifre yazmayın:
+
+```bash
+nano ~/.config/keencli/config.toml
+```
+
+**2. Şifreyi tanımla** — önerilen yol (her terminalde geçerli):
+
+```bash
+cp ~/.config/keencli/.env.example ~/.config/keencli/.env
+nano ~/.config/keencli/.env
+```
+
+`.env` içeriği örneği:
+
+```
+KEENETIC_PASSWORD=router_şifreniz
+```
+
+Geçici alternatif: `export KEENETIC_PASSWORD='...'` (yalnızca o shell oturumu).
+
+**3. Bağlantıyı test et:**
+
+```bash
+keencli status
+```
+
+**4. Veri çek ve analiz et:**
+
+```bash
+keencli fetch -a
+keencli analyze
+```
+
+**5. (Opsiyonel) AI raporu** — `.env` dosyasına ekle:
+
+```
+OPENROUTER_API_KEY=sk-or-...
+LLM_MODEL=anthropic/claude-sonnet-4.6
+```
+
+`~/.local/bin` PATH'te değilse shell profiline ekle ve yeni terminal aç:
+
+```bash
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+**Güncelleme:** Kurulum script'ini tekrar çalıştır (`curl ... | bash` veya `./install.sh`).
+
+### Manuel (geliştirme)
+
 ```bash
 git clone https://github.com/aethrox/keencli.git
 cd keencli
@@ -60,7 +148,7 @@ cp config.toml.example config.toml
 # config.toml: ip ve username
 # Şifreyi config.toml'a YAZMAYIN
 
-export KEENETIC_PASSWORD='router_şifreniz'   # veya .env dosyası
+cp .env.example .env                        # KEENETIC_PASSWORD burada
 
 cargo build --release
 ./target/release/keencli --help
@@ -137,6 +225,7 @@ src/
 ├── main.rs         CLI giriş noktası
 ├── api.rs          Router HTTP + Keenetic auth
 ├── config.rs       config.toml okuma
+├── paths.rs        XDG config/outputs yolları
 ├── credentials.rs  Şifre ve API key (SecretString)
 ├── output.rs       Maskelenmiş dosyaya kaydetme
 ├── analyze.rs      outputs/ okuma ve oluşturma

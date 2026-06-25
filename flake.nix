@@ -23,7 +23,7 @@
         };
         keencli = rustPlatform.buildRustPackage rec {
           pname = "keencli";
-          version = "1.0.1";
+          version = "1.0.2";
           # builtins.path: git'e eklenmemiş dosyalar (Cargo.lock) da dahil edilir
           src = builtins.path {
             path = ./.;

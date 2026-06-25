@@ -1,4 +1,5 @@
 // config.toml dosyasını okur ve doğrular.
+use crate::paths;
 use anyhow::{Context, Result};
 use serde::Deserialize;
 
@@ -14,10 +15,17 @@ pub struct RouterConfig {
 pub fn load() -> Result<RouterConfig> {
     // Yalnızca config.toml — KEENETIC_PASSWORD ayrı okunur (credentials.rs).
     // Environment::with_prefix("KEENETIC") password alanını struct'a sızdırır; deny_unknown_fields reddeder.
+    let config_path = paths::config_file();
     let config = config::Config::builder()
-        .add_source(config::File::with_name("config"))
+        .add_source(config::File::from(config_path.as_path()))
         .build()
-        .context("config.toml okunamadı. Proje kökünde config.toml olduğundan emin olun.")?;
+        .with_context(|| {
+            format!(
+                "config.toml okunamadı (aranan: {}). \
+                 Kurulum için: ~/.config/keencli/config.toml — geliştirme için: ./config.toml",
+                config_path.display()
+            )
+        })?;
 
     let mut config: RouterConfig = config
         .try_deserialize()

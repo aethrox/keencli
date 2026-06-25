@@ -1,4 +1,5 @@
-// `analyze` komutunun dosya işlemleri: outputs/ klasörünü bulur, verileri okur.
+// `analyze` komutunun dosya işlemleri: outputs klasörünü bulur, verileri okur.
+use crate::paths;
 use anyhow::{Context, Result};
 use std::path::{Path, PathBuf};
 
@@ -12,19 +13,20 @@ pub struct FetchData {
     pub mesh: String,
 }
 
-const OUTPUTS_DIR: &str = "outputs";
-
 pub fn ensure_outputs_dir() -> Result<PathBuf> {
-    let path = PathBuf::from(OUTPUTS_DIR);
+    let path = paths::outputs_base();
     if path.exists() && !path.is_dir() {
-        anyhow::bail!("'{OUTPUTS_DIR}' bir klasör değil. Dosyayı silin veya yeniden adlandırın.");
+        anyhow::bail!(
+            "'{}' bir klasör değil. Dosyayı silin veya yeniden adlandırın.",
+            path.display()
+        );
     }
     std::fs::create_dir_all(&path)
-        .with_context(|| format!("'{OUTPUTS_DIR}' klasörü oluşturulamadı"))?;
+        .with_context(|| format!("'{}' klasörü oluşturulamadı", path.display()))?;
     Ok(path)
 }
 
-// En son değiştirilen alt klasörü seçer (ör. outputs/2026-06-25_18-15-39/)
+// En son değiştirilen alt klasörü seçer (ör. .../outputs/2026-06-25_18-15-39/)
 pub fn find_latest_fetch_dir() -> Result<PathBuf> {
     let base = ensure_outputs_dir()?;
     let entries = std::fs::read_dir(&base)
@@ -36,7 +38,10 @@ pub fn find_latest_fetch_dir() -> Result<PathBuf> {
         .max_by_key(|entry| entry.metadata().and_then(|meta| meta.modified()).ok())
         .map(|entry| entry.path())
         .with_context(|| {
-            format!("'{OUTPUTS_DIR}' içinde analiz verisi yok. Önce 'keencli fetch -a' çalıştırın.")
+            format!(
+                "'{}' içinde analiz verisi yok. Önce 'keencli fetch -a' çalıştırın.",
+                base.display()
+            )
         })
 }
 
@@ -69,5 +74,5 @@ pub fn folder_name(dir: &Path) -> Result<String> {
 }
 
 pub fn report_path(dir_name: &str, filename: &str) -> String {
-    format!("{OUTPUTS_DIR}/{dir_name}/{filename}")
+    paths::display_path(&paths::outputs_base().join(dir_name).join(filename))
 }

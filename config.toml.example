@@ -2,5 +2,5 @@ ip = "192.168.1.1"
 username = "admin"
 
 # Şifreyi bu dosyaya YAZMAYIN.
-# export KEENETIC_PASSWORD='router_şifreniz'
-# veya .env dosyası kullanın (.env git'e girmez).
+# Kurulum sonrası: ~/.config/keencli/.env
+# Geliştirme: cp .env.example .env

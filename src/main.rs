@@ -9,6 +9,7 @@ mod llm; // OpenRouter AI çağrıları
 mod log_filter; // Log süzme (~3000 → ~60 satır)
 mod mask; // IP, MAC, SSID maskeleme
 mod output; // Çekilen veriyi dosyaya yazma
+mod paths; // Config ve outputs yolları (kurulum / geliştirme)
 mod prompt; // AI prompt üretimi
 
 use chrono::Local;
@@ -17,8 +18,9 @@ use tokio::fs;
 
 const SETUP_HELP: &str = "\
 Kurulum\n  \
-config.toml     ip, username\n  \
-KEENETIC_PASSWORD   router şifresi\n\n\
+Kurulu: ~/.config/keencli/config.toml + .env\n  \
+Geliştirme: ./config.toml + .env\n  \
+Şifre: KEENETIC_PASSWORD (config.toml'a yazmayın)\n\n\
 Detay için: keencli <komut> --help\n";
 
 #[derive(Parser)]
@@ -131,11 +133,11 @@ async fn run_fetch(all: bool) -> anyhow::Result<()> {
     println!("Username: {}", config.username);
     println!("Veri çekme işlemi başlatılıyor...");
 
-    analyze::ensure_outputs_dir()?;
-
+    let outputs_base = analyze::ensure_outputs_dir()?;
     let timestamp = Local::now().format("%Y-%m-%d_%H-%M-%S").to_string();
-    let dir = format!("outputs/{timestamp}");
+    let dir = outputs_base.join(&timestamp);
     fs::create_dir_all(&dir).await?;
+    let dir = paths::display_path(&dir);
 
     let info = api.get_system_info().await?;
     output::save_system_info_to_dir(&dir, info)?;
@@ -225,10 +227,10 @@ async fn run_status() -> anyhow::Result<()> {
 }
 
 // `#[tokio::main]`: async fonksiyonların çalışması için gerekli (HTTP istekleri).
-// `dotenv`: .env dosyasındaki ortam değişkenlerini yükler (şifre, API key).
+// `paths::load_dotenv`: ~/.config/keencli/.env veya ./.env
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    dotenv::dotenv().ok();
+    paths::load_dotenv();
     let cli = Cli::parse(); // terminalde yazdığın komutu okur (fetch, analyze, status)
 
     match cli.command {
