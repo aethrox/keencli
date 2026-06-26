@@ -4,7 +4,7 @@ Keenetic router'lardan CLI ile tanı verisi toplayan, logları süzen ve isteğe
 
 Hopper, Giga, Speedster vb. modellerde PPPoE kopması, WAN sorunları veya bağlantı dalgalanması yaşandığında web arayüzüne girmeden terminalden teşhis koymanızı sağlar. Veriler zaman damgalı klasörlere kaydedilir; router'a yeniden bağlanmadan analiz edebilirsiniz.
 
-**Sürüm:** 1.0.4 · **Repo:** https://github.com/aethrox/keencli
+**Sürüm:** 1.0.5 · **Repo:** https://github.com/aethrox/keencli
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/install.sh | bash

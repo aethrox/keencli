@@ -1,6 +1,6 @@
 [package]
 name = "keencli"
-version = "1.0.4"
+version = "1.0.5"
 authors = ["Kaan (Aethrox) Demirel"]
 description = "Keenetic router'ınızdan bilgi toplayan komut satırı aracı."
 edition = "2024"
