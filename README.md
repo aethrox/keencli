@@ -4,7 +4,7 @@ Keenetic router'lardan CLI ile tanı verisi toplayan, logları süzen ve isteğe
 
 Hopper, Giga, Speedster vb. modellerde PPPoE kopması, WAN sorunları veya bağlantı dalgalanması yaşandığında web arayüzüne girmeden terminalden teşhis koymanızı sağlar. Veriler zaman damgalı klasörlere kaydedilir; router'a yeniden bağlanmadan analiz edebilirsiniz.
 
-**Sürüm:** 1.0.5 · **Repo:** https://github.com/aethrox/keencli
+**Sürüm:** 1.0.6 · **Repo:** https://github.com/aethrox/keencli
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/install.sh | bash
@@ -19,6 +19,7 @@ curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/install.sh | b
 | `status` | Canlı hostname, uptime ve PPPoE durumunu gösterir |
 
 - Kayıt öncesi IP, MAC ve SSID maskelenir; şifre yalnızca `.env` veya ortam değişkeninden okunur
+- Log filtresi (boot, WAN, DNS churn); `install.sh` / `uninstall.sh`; Nix paketi (`nix build`)
 - `OPENROUTER_API_KEY` tanımlıysa OpenRouter üzerinden tanı raporu yazılır
 - Kurulum sonrası çıktılar `~/.local/share/keencli/outputs/TARİH-SAAT/` altında saklanır
 
@@ -33,17 +34,6 @@ keencli analyze      Süzme → maskeleme → prompt → (opsiyonel) AI raporu
 1. **fetch** — Keenetic auth ile router'a bağlanır, RCI endpoint'lerinden veri çeker
 2. **analyze** — En son fetch klasörünü okur, log'u filtreler, `prompt_for_ai.txt` üretir
 3. **AI** — API key varsa prompt OpenRouter'a gönderilir; rapor aynı klasöre kaydedilir
-
-## Özellikler
-
-| Alan | Durum |
-|------|-------|
-| `fetch` / `analyze` / `status` | ✓ |
-| Log filtresi (boot, WAN, DNS churn) | ✓ |
-| Hassas veri maskeleme | ✓ |
-| `install.sh` / `uninstall.sh` | ✓ |
-| Nix paketi (`nix build`) | ✓ |
-| OpenRouter AI raporu | ✓ |
 
 ## Kurulum
 
@@ -121,13 +111,10 @@ keencli analyze
 ```env
 OPENROUTER_API_KEY=sk-or-...
 LLM_MODEL=anthropic/claude-sonnet-4.6   # önerilen
+LLM_TEMPERATURE=0.3                     # opsiyonel; varsayılan 0.3
 ```
 
-PATH gerekirse (`~/.bashrc` / `~/.zshrc`):
-
-```bash
-export PATH="$HOME/.local/bin:$PATH"
-```
+`LLM_TEMPERATURE` tanımlı değilse **0.3** kullanılır (tanı raporu için önerilen). Deneme için `0.7` verebilirsiniz; `sakana/*` modellerinde gönderilmez.
 
 **Güncelleme:** `install.sh` script'ini tekrar çalıştırın.
 
@@ -207,25 +194,29 @@ outputs/2026-06-25_18-15-39/
 
 ### Önerilen modeller
 
+Gerçek router verisi üzerinde test edilmiş öneriler — ayrıntılı karşılaştırma: [AI_MODELS.md](AI_MODELS.md)
+
 | Öncelik | Model | Ne zaman? |
 |---------|-------|-----------|
-| **1 — Önerilen** | `anthropic/claude-sonnet-4.6` | WAN/PPPoE/DNS korelasyonu ve okunabilir tanı raporu için; varsayılan tercih |
-| **2 — Ekonomik** | `qwen/qwen3-235b-a22b` | Daha düşük maliyet; basit vakalarda yeterli olabilir |
-| **3 — Alternatif** | `google/gemini-2.5-pro` | Farklı sağlayıcı denemek istediğinizde |
+| **1 — Önerilen** | `anthropic/claude-sonnet-4.6` | En eksiksiz tanı raporu; varsayılan tercih |
+| **2 — Ekonomik** | `deepseek/deepseek-v4-pro` | Düşük maliyet; testte güvenilir ikinci seçenek |
+| **3 — Alternatif** | `google/gemini-2.5-pro` | Farklı sağlayıcı; severity bazen şişkin |
+| **4 — Bütçe** | `qwen/qwen3.5-plus-02-15` | Ucuz; DNS iyi, bazı WAN olayları atlanabilir |
 
-Model adlarını [OpenRouter model listesinden](https://openrouter.ai/models) doğrulayın; sağlayıcılar zamanla güncellenebilir.
+Bu görevde **önerilmez** (test): `openai/gpt-4.1`, `qwen/qwen3-235b-a22b`, `x-ai/grok-4.20`, `x-ai/grok-4.3` — log flap'lerini sık kaçırır veya route kaybını inkâr eder.
+
+Model adlarını [OpenRouter model listesinden](https://openrouter.ai/models) doğrulayın.
 
 ```bash
 export OPENROUTER_API_KEY='sk-or-...'
 export LLM_MODEL='anthropic/claude-sonnet-4.6'   # önerilen
+export LLM_TEMPERATURE='0.3'                     # opsiyonel
 
 keencli analyze
 ```
 
 API key yoksa yalnızca `prompt_for_ai.txt` üretilir; komut hata vermez.  
 `analyze` sırasında verilerin OpenRouter'a gönderileceği konusunda uyarı gösterilir.
-
-> **AI uyarısı:** AI raporları otomatik üretilir; %100 doğruluk garantisi yoktur. Kesin teşhis veya yapılandırma değişikliği öncesinde bulguları kendiniz doğrulamanız; kritik kararlar için profesyonel destek almanız önerilir.
 
 ## Güvenlik
 

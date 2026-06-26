@@ -122,8 +122,9 @@ Fetch verisi yoksa hata verir.\n\
 \n\
 [AI — opsiyonel ortam değişkenleri]\n\
 - OPENROUTER_API_KEY\n\
-- LLM_MODEL  önerilen: anthropic/claude-sonnet-4.6\n\
-             ekonomik: qwen/qwen3-235b-a22b\n\
+- LLM_MODEL        önerilen: anthropic/claude-sonnet-4.6\n\
+- LLM_TEMPERATURE  opsiyonel, varsayılan 0.3 (0.0–2.0)\n\
+             ekonomik: deepseek/deepseek-v4-pro\n\
 \n\
 [Örnek akış]\n\
 keencli fetch -a\n\
