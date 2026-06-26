@@ -122,7 +122,8 @@ Fetch verisi yoksa hata verir.\n\
 \n\
 [AI — opsiyonel ortam değişkenleri]\n\
 - OPENROUTER_API_KEY\n\
-- LLM_MODEL  (örn. anthropic/claude-sonnet-4.6)\n\
+- LLM_MODEL  önerilen: anthropic/claude-sonnet-4.6\n\
+             ekonomik: qwen/qwen3-235b-a22b\n\
 \n\
 [Örnek akış]\n\
 keencli fetch -a\n\
@@ -238,6 +239,7 @@ async fn run_analyze() -> anyhow::Result<()> {
             println!(
                 "Not: Tanılama verileri OpenRouter üzerinden '{model}' modeline gönderilecek."
             );
+            println!("Not: AI raporu otomatik üretilir; %100 doğruluk garantisi yoktur.");
             println!("AI analizi yapılıyor...");
             let llm = llm::LLMClient::new(api_key, model)?;
             let result = llm.analyze(prompt).await?;

@@ -114,10 +114,11 @@ cmd "keencli fetch -a"
 cmd "keencli analyze"
 echo ""
 
-echo "  Opsiyonel — AI raporu için .env dosyasına ekle:"
+echo "  Opsiyonel — AI raporu için .env dosyasına ekleyin:"
 echo ""
 cmd "OPENROUTER_API_KEY=sk-or-..."
-cmd "LLM_MODEL=anthropic/claude-sonnet-4.6"
+cmd "LLM_MODEL=anthropic/claude-sonnet-4.6   # önerilen"
+echo "     Alternatif: qwen/qwen3-235b-a22b (ekonomik)"
 echo ""
 
 heading "Diğer"

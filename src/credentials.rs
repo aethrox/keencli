@@ -26,7 +26,7 @@ pub fn resolve_llm_config() -> Result<(SecretString, String)> {
     }
 
     let model = std::env::var("LLM_MODEL").context(
-        "LLM_MODEL tanımlı değil. Örnek: export LLM_MODEL='anthropic/claude-sonnet-4.6'",
+        "LLM_MODEL tanımlı değil. Önerilen: export LLM_MODEL='anthropic/claude-sonnet-4.6'",
     )?;
 
     if model.trim().is_empty() {

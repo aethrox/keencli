@@ -1,52 +1,49 @@
 # keencli
 
-Keenetic router'dan tanı verisi toplayan, kaydeden ve isteğe bağlı AI ile analiz eden komut satırı aracı.
+Keenetic router'lardan CLI ile tanı verisi toplayan, logları süzen ve isteğe bağlı AI raporu üreten komut satırı aracı.
 
-**Sürüm:** 1.0.3 · **Repo:** https://github.com/aethrox/keencli
+Hopper, Giga, Speedster vb. modellerde PPPoE kopması, WAN sorunları veya bağlantı dalgalanması yaşandığında web arayüzüne girmeden terminalden teşhis koymanızı sağlar. Veriler zaman damgalı klasörlere kaydedilir; router'a yeniden bağlanmadan analiz edebilirsiniz.
 
-## Hedef
+**Sürüm:** 1.0.4 · **Repo:** https://github.com/aethrox/keencli
 
-Keenetic router'larda (Hopper, Giga, Speedster vb.) bağlantı sorunlarını **tek komutla** teşhis etmeyi kolaylaştırmak.
+```bash
+curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/install.sh | bash
+```
 
-Manuel log okuma ve web arayüzü gezintisi yerine:
+## Ne yapar?
 
-1. Router verisini yapılandırılmış şekilde toplamak
-2. Gürültülü syslog'u AI için anlamlı satırlara indirmek
-3. WAN/PPPoE/link olaylarını korele eden tanı raporu üretmek
+| Adım | Açıklama |
+|------|----------|
+| `fetch` | Sistem, PPPoE, ping, log, Wi-Fi ve mesh verisini router'dan çeker |
+| `analyze` | Log'u süzer (~3000 → ~60 satır), maskeler, AI prompt'u üretir |
+| `status` | Canlı hostname, uptime ve PPPoE durumunu gösterir |
 
-Uzun vadede: ev ağı sorunlarında hızlı, tekrarlanabilir ve kayıt altına alınabilir bir tanı akışı sağlamak.
-
-### v1.0 kapsamı (tamamlandı)
-
-| Alan | Durum |
-|------|-------|
-| `fetch` / `analyze` / `status` | Tamam |
-| Log filtresi (boot/WAN/DNS churn) | Tamam |
-| Hassas veri maskeleme + `SecretString` | Tamam |
-| Nix paketi (`nix build`) | Tamam |
-| OpenRouter AI raporu | Tamam |
-
-## Ne için?
-
-Router arayüzüne girmeden şunları yapmak için:
-
-- Sistem, PPPoE, ping, log, Wi-Fi ve mesh verisini çekmek
-- Logları süzüp AI'ya uygun prompt üretmek
-- OpenRouter üzerinden tanı raporu almak
-
-Veriler `outputs/TARİH-SAAT/` altına kaydedilir (kurulum sonrası: `~/.local/share/keencli/outputs/`); router'a tekrar bağlanmadan analiz edilebilir. `outputs/` yoksa `fetch` veya `analyze` sırasında otomatik oluşturulur.
+- Kayıt öncesi IP, MAC ve SSID maskelenir; şifre yalnızca `.env` veya ortam değişkeninden okunur
+- `OPENROUTER_API_KEY` tanımlıysa OpenRouter üzerinden tanı raporu yazılır
+- Kurulum sonrası çıktılar `~/.local/share/keencli/outputs/TARİH-SAAT/` altında saklanır
 
 ## Nasıl çalışır?
 
 ```
-keencli fetch -a          Router → JSON/log dosyaları
+keencli fetch -a     Router → JSON ve log dosyaları
        ↓
-keencli analyze           Log süzme → maskeleme → prompt → (opsiyonel) AI raporu
+keencli analyze      Süzme → maskeleme → prompt → (opsiyonel) AI raporu
 ```
 
-1. **fetch** — Router'a HTTP ile bağlanır (Keenetic auth), RCI endpoint'lerinden veri çeker. Kayıt öncesi IP/MAC/SSID maskelenir.
-2. **analyze** — En son `outputs/` klasörünü okur, log'u filtreler (~3000 → ~60 satır), prompt üretir.
-3. **AI** — `OPENROUTER_API_KEY` tanımlıysa prompt OpenRouter'a gönderilir; rapor aynı klasöre yazılır.
+1. **fetch** — Keenetic auth ile router'a bağlanır, RCI endpoint'lerinden veri çeker
+2. **analyze** — En son fetch klasörünü okur, log'u filtreler, `prompt_for_ai.txt` üretir
+3. **AI** — API key varsa prompt OpenRouter'a gönderilir; rapor aynı klasöre kaydedilir
+
+## Özellikler
+
+| Alan | Durum |
+|------|-------|
+| `fetch` / `analyze` / `status` | ✓ |
+| Log filtresi (boot, WAN, DNS churn) | ✓ |
+| Hassas veri maskeleme | ✓ |
+| `install.sh` / `uninstall.sh` | ✓ |
+| Nix paketi (`nix build`) | ✓ |
+| OpenRouter AI raporu | ✓ |
 
 ## Kurulum
 
@@ -87,7 +84,7 @@ Kurulum script'i bitince config, şifre ve ilk kullanım adımlarını ekranda g
 | `~/.config/keencli/.env` | Router şifresi, AI anahtarları |
 | `~/.local/share/keencli/outputs/` | Fetch ve analiz çıktıları |
 
-**1 — Config** (`ip`, `username`; şifre yazma):
+**1 — Config** (`ip`, `username`; şifre yazmayın):
 
 ```bash
 nano ~/.config/keencli/config.toml
@@ -119,11 +116,11 @@ keencli fetch -a
 keencli analyze
 ```
 
-**5 — AI (opsiyonel)** — `.env` dosyasına ekle:
+**5 — AI (opsiyonel)** — `.env` dosyasına ekleyin:
 
 ```env
 OPENROUTER_API_KEY=sk-or-...
-LLM_MODEL=anthropic/claude-sonnet-4.6
+LLM_MODEL=anthropic/claude-sonnet-4.6   # önerilen
 ```
 
 PATH gerekirse (`~/.bashrc` / `~/.zshrc`):
@@ -132,7 +129,7 @@ PATH gerekirse (`~/.bashrc` / `~/.zshrc`):
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-**Güncelleme:** `install.sh` script'ini tekrar çalıştır.
+**Güncelleme:** `install.sh` script'ini tekrar çalıştırın.
 
 ### Kaldırma
 
@@ -143,7 +140,7 @@ curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/uninstall.sh -
 bash uninstall.sh
 ```
 
-`curl | bash` çalışmaz; önce indirip terminalden çalıştır. Yanlışlıkla silmeyi önlemek için kasıtlıdır.
+`curl | bash` çalışmaz; önce indirip terminalden çalıştırın. Yanlışlıkla silmeyi önlemek için kasıtlıdır.
 
 ### Manuel (geliştirme)
 
@@ -208,15 +205,27 @@ outputs/2026-06-25_18-15-39/
 
 ## AI analizi (opsiyonel)
 
+### Önerilen modeller
+
+| Öncelik | Model | Ne zaman? |
+|---------|-------|-----------|
+| **1 — Önerilen** | `anthropic/claude-sonnet-4.6` | WAN/PPPoE/DNS korelasyonu ve okunabilir tanı raporu için; varsayılan tercih |
+| **2 — Ekonomik** | `qwen/qwen3-235b-a22b` | Daha düşük maliyet; basit vakalarda yeterli olabilir |
+| **3 — Alternatif** | `google/gemini-2.5-pro` | Farklı sağlayıcı denemek istediğinizde |
+
+Model adlarını [OpenRouter model listesinden](https://openrouter.ai/models) doğrulayın; sağlayıcılar zamanla güncellenebilir.
+
 ```bash
 export OPENROUTER_API_KEY='sk-or-...'
-export LLM_MODEL='anthropic/claude-sonnet-4.6'
+export LLM_MODEL='anthropic/claude-sonnet-4.6'   # önerilen
 
 keencli analyze
 ```
 
 API key yoksa yalnızca `prompt_for_ai.txt` üretilir; komut hata vermez.  
 `analyze` sırasında verilerin OpenRouter'a gönderileceği konusunda uyarı gösterilir.
+
+> **AI uyarısı:** AI raporları otomatik üretilir; %100 doğruluk garantisi yoktur. Kesin teşhis veya yapılandırma değişikliği öncesinde bulguları kendiniz doğrulamanız; kritik kararlar için profesyonel destek almanız önerilir.
 
 ## Güvenlik
 
@@ -256,6 +265,14 @@ src/
 | Maskeleme | regex |
 | Hata yönetimi | anyhow |
 
+## Yasal uyarı
+
+- **Bağımsız proje** — keencli, Keenetic veya OpenRouter ile bağlantılı değildir; resmi bir ürün değildir.
+- **Garanti yok** — Yazılım «olduğu gibi» (as-is) sunulur; açık veya zımni garanti verilmez. Kullanımdan doğan zararlardan yazar sorumlu tutulamaz.
+- **AI çıktıları** — OpenRouter üzerinden üretilen raporlar yalnızca yardımcı öneridir; hata, eksik veya yanlış bilgi içerebilir. Ağ veya router ayarı değiştirmeden önce sonuçları bağımsız olarak doğrulamanız gerekir.
+- **Üçüncü taraf hizmetler** — AI analizi OpenRouter'a veri gönderir; kullanımınız kendi API koşullarına tabidir. Veriler, maskeleme sonrası bile üçüncü tarafa iletilir.
+- **Kullanıcı sorumluluğu** — Router kimlik bilgilerinizi ve API anahtarlarınızı güvenli tutmak, yerel mevzuata ve hizmet koşullarına uymak sizin sorumluluğunuzdadır.
+
 ## Lisans
 
-MIT — bkz. [LICENSE](LICENSE)
+MIT — ayrıntılar için [LICENSE](LICENSE). Yukarıdaki sorumluluk reddi, MIT lisansının «as-is» koşullarını tamamlar.

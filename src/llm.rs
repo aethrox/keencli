@@ -74,7 +74,13 @@ impl LLMClient {
     pub fn format_report(model: &str, content: &str) -> String {
         let generated = Local::now().format("%Y-%m-%d %H:%M:%S");
         format!(
-            "<!-- model: {model} -->\n<!-- generated: {generated} -->\n\n**Model:** `{model}`\n\n{content}"
+            "<!-- model: {model} -->\n<!-- generated: {generated} -->\n\n\
+             **Model:** `{model}`\n\n\
+             {content}\n\n\
+             ---\n\n\
+             *Bu rapor otomatik üretilmiştir; %100 doğruluk garantisi yoktur. \
+             Yapılandırma değişikliği veya kesin teşhis öncesinde bulguları \
+             bağımsız olarak doğrulamanız gerekir.*"
         )
     }
 }
