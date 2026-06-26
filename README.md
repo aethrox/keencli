@@ -2,6 +2,9 @@
 
 Keenetic router'lardan CLI ile tanı verisi toplayan, logları süzen ve isteğe bağlı AI raporu üreten komut satırı aracı.
 
+> [!CAUTION]
+> **Yapay zeka çıktıları hata içerebilir. Kesin teşhis ve router değişikliklerinden önce bulguları loglar üzerinden veya bir uzmanla doğrulayın.**
+
 Hopper, Giga, Speedster vb. modellerde PPPoE kopması, WAN sorunları veya bağlantı dalgalanması yaşandığında web arayüzüne girmeden terminalden teşhis koymanızı sağlar. Veriler zaman damgalı klasörlere kaydedilir; router'a yeniden bağlanmadan analiz edebilirsiniz.
 
 **Sürüm:** 1.0.6 · **Repo:** https://github.com/aethrox/keencli
