@@ -3,7 +3,7 @@
 Keenetic router'lardan CLI ile tanı verisi toplayan, logları süzen ve isteğe bağlı AI raporu üreten komut satırı aracı.
 
 > [!CAUTION]
-> **Yapay zeka çıktıları hata içerebilir. Kesin teşhis ve router değişikliklerinden önce bulguları loglar üzerinden veya bir uzmanla doğrulayın.**
+> **Yapay zeka çıktılarında hatalar bulunabilir. Kesin bir teşhis koymadan veya yönlendiricide değişiklik yapmadan önce, günlükleri inceleyerek veya bir uzmana danışarak bulguları doğrulayın.**
 
 Hopper, Giga, Speedster vb. modellerde PPPoE kopması, WAN sorunları veya bağlantı dalgalanması yaşandığında web arayüzüne girmeden terminalden teşhis koymanızı sağlar. Veriler zaman damgalı klasörlere kaydedilir; router'a yeniden bağlanmadan analiz edebilirsiniz.
 
