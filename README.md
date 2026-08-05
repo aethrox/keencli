@@ -1,89 +1,73 @@
 # keencli
 
-Keenetic router'lardan CLI ile tanı verisi toplayan, logları süzen ve isteğe bağlı AI raporu üreten komut satırı aracı.
+A CLI that pulls diagnostic data from Keenetic routers (system, PPPoE, ping, logs, Wi-Fi, mesh), filters and masks it, and optionally turns it into an AI-written diagnostic report.
 
 > [!CAUTION]
-> **Yapay zeka çıktılarında hatalar bulunabilir. Kesin bir teşhis koymadan veya yönlendiricide değişiklik yapmadan önce, günlükleri inceleyerek veya bir uzmana danışarak bulguları doğrulayın.**
+> AI-generated reports can be wrong. Verify findings against the raw logs or a human expert before treating a diagnosis as certain or changing anything on the router.
 
-Hopper, Giga, Speedster vb. modellerde PPPoE kopması, WAN sorunları veya bağlantı dalgalanması yaşandığında web arayüzüne girmeden terminalden teşhis koymanızı sağlar. Veriler zaman damgalı klasörlere kaydedilir; router'a yeniden bağlanmadan analiz edebilirsiniz.
+Useful when a Hopper/Giga/Speedster-class Keenetic router has PPPoE drops, WAN issues, or flaky connectivity and you'd rather diagnose from a terminal than the web UI. Output is saved to timestamped folders, so you can analyze it without staying connected to the router.
 
-**Sürüm:** 1.0.6 · **Repo:** https://github.com/aethrox/keencli
+**Version:** 1.0.6 · **Repo:** https://github.com/aethrox/keencli
 
-```bash
-curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/install.sh | bash
-```
-
-## Ne yapar?
-
-| Adım | Açıklama |
-|------|----------|
-| `fetch` | Sistem, PPPoE, ping, log, Wi-Fi ve mesh verisini router'dan çeker |
-| `analyze` | Log'u süzer (~3000 → ~60 satır), maskeler, AI prompt'u üretir |
-| `status` | Canlı hostname, uptime ve PPPoE durumunu gösterir |
-
-- Kayıt öncesi IP, MAC ve SSID maskelenir; şifre yalnızca `.env` veya ortam değişkeninden okunur
-- Log filtresi (boot, WAN, DNS churn); `install.sh` / `uninstall.sh`; Nix paketi (`nix build`)
-- `OPENROUTER_API_KEY` tanımlıysa OpenRouter üzerinden tanı raporu yazılır
-- Kurulum sonrası çıktılar `~/.local/share/keencli/outputs/TARİH-SAAT/` altında saklanır
-
-## Nasıl çalışır?
-
-```
-keencli fetch -a     Router → JSON ve log dosyaları
-       ↓
-keencli analyze      Süzme → maskeleme → prompt → (opsiyonel) AI raporu
-```
-
-1. **fetch** — Keenetic auth ile router'a bağlanır, RCI endpoint'lerinden veri çeker
-2. **analyze** — En son fetch klasörünü okur, log'u filtreler, `prompt_for_ai.txt` üretir
-3. **AI** — API key varsa prompt OpenRouter'a gönderilir; rapor aynı klasöre kaydedilir
-
-## Kurulum
-
-**Gereksinimler:** Rust (edition 2024), router ile aynı ağ.
-
-### Tek komut (önerilen)
+## Quick start
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/install.sh | bash
 ```
 
-Script şunları yapar:
-
-- Kaynağı `~/.local/share/keencli/src` altına indirir ve derler
-- Binary'yi `~/.local/bin/keencli` konumuna kurar
-- Örnek config'i `~/.config/keencli/config.toml` olarak oluşturur
-- Fetch çıktıları `~/.local/share/keencli/outputs/` altına yazılır
-
-`~/.local/bin` PATH'te değilse script uyarı verir; shell profiline ekleyin:
+This downloads and builds the source under `~/.local/share/keencli/src`, installs the binary to `~/.local/bin/keencli`, writes a starter config to `~/.config/keencli/config.toml`, and stores fetch output under `~/.local/share/keencli/outputs/`. If `~/.local/bin` isn't on your `PATH`, the script warns you, so add it:
 
 ```bash
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-Yerel script ile kurulum:
+Then set up the router IP/username and password (see Configuration below) and run:
 
 ```bash
-./install.sh
+keencli status
+keencli fetch -a
+keencli analyze
 ```
 
-Kurulum script'i bitince config, şifre ve ilk kullanım adımlarını ekranda gösterir.
+## What it does
 
-### Kurulum sonrası
+| Command | What it collects/does |
+|---|---|
+| `keencli fetch` | Pulls `system.json` only |
+| `keencli fetch -a` | Pulls all data (system, PPPoE, ping, logs, Wi-Fi, mesh), required for `analyze` |
+| `keencli analyze` | Filters the log (~3000 lines down to ~60), masks sensitive fields, builds an AI prompt, and writes an AI report if an API key is configured |
+| `keencli status` | Live hostname, uptime, and PPPoE status |
 
-| Dosya | Ne için |
-|-------|---------|
-| `~/.config/keencli/config.toml` | Router IP ve kullanıcı adı |
-| `~/.config/keencli/.env` | Router şifresi, AI anahtarları |
-| `~/.local/share/keencli/outputs/` | Fetch ve analiz çıktıları |
+Each command has `--help` for the full flag list.
 
-**1 — Config** (`ip`, `username`; şifre yazmayın):
+## How it works
+
+```
+keencli fetch -a     router -> JSON + log files
+       |
+       v
+keencli analyze      filter -> mask -> prompt -> (optional) AI report
+```
+
+1. **fetch**: authenticates with the router over Keenetic's own auth scheme and pulls data from its RCI endpoints.
+2. **analyze**: reads the most recent fetch folder, filters the log (boot noise, WAN flaps, DNS churn), and writes `prompt_for_ai.txt`.
+3. **AI report**: if `OPENROUTER_API_KEY` is set, the prompt is sent to OpenRouter and the report is saved next to the fetch data. Without a key, `analyze` still runs and just skips this step.
+
+## Configuration
+
+| File | Purpose |
+|---|---|
+| `~/.config/keencli/config.toml` | Router IP and username |
+| `~/.config/keencli/.env` | Router password, AI API key |
+| `~/.local/share/keencli/outputs/` | Fetch and analysis output |
+
+**1. Config** (edit `ip` and `username`, never put the password here):
 
 ```bash
 nano ~/.config/keencli/config.toml
 ```
 
-**2 — Şifre** (kalıcı, önerilen):
+**2. Password** (persistent, recommended):
 
 ```bash
 cp ~/.config/keencli/.env.example ~/.config/keencli/.env
@@ -91,90 +75,50 @@ nano ~/.config/keencli/.env
 ```
 
 ```env
-KEENETIC_PASSWORD=router_şifreniz
+KEENETIC_PASSWORD=your_router_password
 ```
 
-Geçici: `export KEENETIC_PASSWORD='...'` (yalnızca o terminal).
+Or set it just for the current shell: `export KEENETIC_PASSWORD='...'`.
 
-**3 — Test:**
-
-```bash
-keencli status
-```
-
-**4 — Kullanım:**
-
-```bash
-keencli fetch -a
-keencli analyze
-```
-
-**5 — AI (opsiyonel)** — `.env` dosyasına ekleyin:
+**3. AI report (optional)**, add to `.env`:
 
 ```env
 OPENROUTER_API_KEY=sk-or-...
-LLM_MODEL=anthropic/claude-sonnet-4.6   # önerilen
-LLM_TEMPERATURE=0.3                     # opsiyonel; varsayılan 0.3
+LLM_MODEL=anthropic/claude-sonnet-4.6   # recommended
+LLM_TEMPERATURE=0.3                     # optional, defaults to 0.3
 ```
 
-`LLM_TEMPERATURE` tanımlı değilse **0.3** kullanılır (tanı raporu için önerilen). Deneme için `0.7` verebilirsiniz; `sakana/*` modellerinde gönderilmez.
+See [AI_MODELS.md](AI_MODELS.md) for model recommendations tested against real router data. `anthropic/claude-sonnet-4.6` gives the most complete reports; `deepseek/deepseek-v4-pro` is a cheaper reliable second choice. `openai/gpt-4.1`, `qwen/qwen3-235b-a22b`, `x-ai/grok-4.20`, and `x-ai/grok-4.3` are not recommended for this task: they tend to miss log flaps or deny route loss in testing.
 
-**Güncelleme:** `install.sh` script'ini tekrar çalıştırın.
+**Update:** re-run `install.sh`.
 
-### Kaldırma
+## Uninstall
 
-Tamamen etkileşimli — binary, config ve veri için ayrı onay; varsayılan yanıt hayır.
+Fully interactive, with separate confirmation for the binary, config, and data, defaulting to no on each:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/aethrox/keencli/main/uninstall.sh -o uninstall.sh
 bash uninstall.sh
 ```
 
-`curl | bash` çalışmaz; önce indirip terminalden çalıştırın. Yanlışlıkla silmeyi önlemek için kasıtlıdır.
+This deliberately can't be piped through `curl | bash`; download it and run it locally to avoid accidental deletion.
 
-### Manuel (geliştirme)
+## Manual / development setup
 
 ```bash
 git clone https://github.com/aethrox/keencli.git
 cd keencli
-
-cp config.toml.example config.toml
-# config.toml: ip ve username
-# Şifreyi config.toml'a YAZMAYIN
-
-cp .env.example .env                        # KEENETIC_PASSWORD burada
-
+cp config.toml.example config.toml   # fill in ip and username, not the password
+cp .env.example .env                 # KEENETIC_PASSWORD goes here
 cargo build --release
 ./target/release/keencli --help
 ```
 
-### Nix
+Nix is also supported: `nix develop` (dev shell), `nix build` (package, binary at `./result/bin/keencli`), `nix run` (run via flake app).
 
-```bash
-nix develop          # geliştirme ortamı
-nix build            # paket derle
-./result/bin/keencli --version
+## Output files
 
-nix run              # flake app ile çalıştır
-```
-
-`cargo build` sonrası güncel binary: `./target/debug/keencli` veya `./target/release/keencli`.  
-`./result/bin/keencli` yalnızca `nix build` sonrası günceldir.
-
-## Komutlar
-
-| Komut | Açıklama |
-|-------|----------|
-| `keencli fetch` | Yalnızca `system.json` |
-| `keencli fetch -a` | Tüm veriler (analyze için gerekli) |
-| `keencli analyze` | Prompt + opsiyonel AI raporu |
-| `keencli status` | Canlı hostname, uptime, PPPoE |
-
-Detay: `keencli <komut> --help`
-
-## Çıktı dosyaları
-
-`fetch -a` sonrası:
+After `fetch -a`:
 
 ```
 outputs/2026-06-25_18-15-39/
@@ -186,87 +130,64 @@ outputs/2026-06-25_18-15-39/
 └── mesh.json
 ```
 
-`analyze` sonrası eklenenler:
+`analyze` adds:
 
 ```
 ├── prompt_for_ai.txt
-└── ai_report_anthropic-claude-sonnet-4.6.md   # API key varsa
+└── ai_report_anthropic-claude-sonnet-4.6.md   # only if an API key is set
 ```
 
-## AI analizi (opsiyonel)
+## Security
 
-### Önerilen modeller
+- The router password is read only from `KEENETIC_PASSWORD` (env or `.env`); it can't be written into `config.toml` (`deny_unknown_fields` rejects it).
+- Output files and the AI prompt have IP/MAC/SSID masked before they're written.
+- `.env` and `outputs/` are git-ignored.
 
-Gerçek router verisi üzerinde test edilmiş öneriler — ayrıntılı karşılaştırma: [AI_MODELS.md](AI_MODELS.md)
-
-| Öncelik | Model | Ne zaman? |
-|---------|-------|-----------|
-| **1 — Önerilen** | `anthropic/claude-sonnet-4.6` | En eksiksiz tanı raporu; varsayılan tercih |
-| **2 — Ekonomik** | `deepseek/deepseek-v4-pro` | Düşük maliyet; testte güvenilir ikinci seçenek |
-| **3 — Alternatif** | `google/gemini-2.5-pro` | Farklı sağlayıcı; severity bazen şişkin |
-| **4 — Bütçe** | `qwen/qwen3.5-plus-02-15` | Ucuz; DNS iyi, bazı WAN olayları atlanabilir |
-
-Bu görevde **önerilmez** (test): `openai/gpt-4.1`, `qwen/qwen3-235b-a22b`, `x-ai/grok-4.20`, `x-ai/grok-4.3` — log flap'lerini sık kaçırır veya route kaybını inkâr eder.
-
-Model adlarını [OpenRouter model listesinden](https://openrouter.ai/models) doğrulayın.
-
-```bash
-export OPENROUTER_API_KEY='sk-or-...'
-export LLM_MODEL='anthropic/claude-sonnet-4.6'   # önerilen
-export LLM_TEMPERATURE='0.3'                     # opsiyonel
-
-keencli analyze
-```
-
-API key yoksa yalnızca `prompt_for_ai.txt` üretilir; komut hata vermez.  
-`analyze` sırasında verilerin OpenRouter'a gönderileceği konusunda uyarı gösterilir.
-
-## Güvenlik
-
-- Router şifresi yalnızca `KEENETIC_PASSWORD` ortam değişkeni (veya `.env`)
-- `config.toml`'a şifre yazılamaz (`deny_unknown_fields`)
-- `outputs/` kayıtları ve AI prompt'u IP/MAC/SSID maskelenmiş halde
-- `.env` ve `outputs/` git'e girmez
-
-## Proje yapısı
+## Project structure
 
 ```
 src/
-├── main.rs         CLI giriş noktası
-├── api.rs          Router HTTP + Keenetic auth
-├── config.rs       config.toml okuma
-├── paths.rs        XDG config/outputs yolları
-├── credentials.rs  Şifre ve API key (SecretString)
-├── output.rs       Maskelenmiş dosyaya kaydetme
-├── analyze.rs      outputs/ okuma ve oluşturma
-├── log_filter.rs   Log süzme (WAN, ping-check, DNS churn)
-├── mask.rs         IP/MAC/SSID maskeleme
-├── prompt.rs       AI prompt üretimi
-└── llm.rs          OpenRouter istemcisi
+├── main.rs         CLI entry point
+├── api.rs          Router HTTP client + Keenetic auth
+├── config.rs       config.toml parsing
+├── paths.rs        XDG config/output paths
+├── credentials.rs  Password and API key handling (SecretString)
+├── output.rs       Writes masked output files
+├── analyze.rs      Reads outputs/, builds the report
+├── log_filter.rs   Log filtering (WAN, ping-check, DNS churn)
+├── mask.rs         IP/MAC/SSID masking
+├── prompt.rs       AI prompt generation
+└── llm.rs          OpenRouter client
 ```
 
-## Kullanılan teknolojiler
+## Built with
 
-| Alan | Kütüphane |
-|------|-----------|
+| Area | Library |
+|---|---|
 | CLI | clap |
 | HTTP | reqwest (cookies) |
 | Async | tokio |
 | Config | config + TOML |
 | Auth | md5 + sha2 (Keenetic challenge) |
-| Gizli veri | secrecy |
+| Secrets | secrecy |
 | JSON | serde / serde_json |
-| Maskeleme | regex |
-| Hata yönetimi | anyhow |
+| Masking | regex |
+| Errors | anyhow |
 
-## Yasal uyarı
+## Limitations
 
-- **Bağımsız proje** — keencli, Keenetic veya OpenRouter ile bağlantılı değildir; resmi bir ürün değildir.
-- **Garanti yok** — Yazılım «olduğu gibi» (as-is) sunulur; açık veya zımni garanti verilmez. Kullanımdan doğan zararlardan yazar sorumlu tutulamaz.
-- **AI çıktıları** — OpenRouter üzerinden üretilen raporlar yalnızca yardımcı öneridir; hata, eksik veya yanlış bilgi içerebilir. Ağ veya router ayarı değiştirmeden önce sonuçları bağımsız olarak doğrulamanız gerekir.
-- **Üçüncü taraf hizmetler** — AI analizi OpenRouter'a veri gönderir; kullanımınız kendi API koşullarına tabidir. Veriler, maskeleme sonrası bile üçüncü tarafa iletilir.
-- **Kullanıcı sorumluluğu** — Router kimlik bilgilerinizi ve API anahtarlarınızı güvenli tutmak, yerel mevzuata ve hizmet koşullarına uymak sizin sorumluluğunuzdadır.
+- Tested against Keenetic Hopper/Giga/Speedster-class routers only; other Keenetic models or firmware versions are untested.
+- AI reports are advisory only; they can be wrong or incomplete, and OpenRouter receives the (masked) prompt regardless of which model is chosen. See Disclaimer below.
+- No `SECURITY.md` or private vulnerability-reporting channel configured for this repo yet.
 
-## Lisans
+## Disclaimer
 
-MIT — ayrıntılar için [LICENSE](LICENSE). Yukarıdaki sorumluluk reddi, MIT lisansının «as-is» koşullarını tamamlar.
+- **Independent project**: keencli is not affiliated with, endorsed by, or an official product of Keenetic or OpenRouter.
+- **No warranty**: provided "as is", without warranty of any kind; the author is not liable for damages arising from use.
+- **AI output**: reports generated via OpenRouter are advisory only and may contain errors, omissions, or incorrect information; verify independently before changing any network or router setting.
+- **Third-party services**: AI analysis sends data to OpenRouter, subject to its own terms; data is transmitted to a third party even after masking.
+- **Your responsibility**: keeping router credentials and API keys secure, and complying with local law and service terms, is on you.
+
+## License
+
+MIT, see [LICENSE](LICENSE). The disclaimer above supplements, and does not replace, the MIT license's "as is" terms.
