@@ -142,6 +142,7 @@ outputs/2026-06-25_18-15-39/
 - The router password is read only from `KEENETIC_PASSWORD` (env or `.env`); it can't be written into `config.toml` (`deny_unknown_fields` rejects it).
 - Output files and the AI prompt have IP/MAC/SSID masked before they're written.
 - `.env` and `outputs/` are git-ignored.
+- Found a vulnerability? See [SECURITY.md](SECURITY.md) to report it privately through GitHub.
 
 ## Project structure
 
@@ -178,7 +179,6 @@ src/
 
 - Tested against Keenetic Hopper/Giga/Speedster-class routers only; other Keenetic models or firmware versions are untested.
 - AI reports are advisory only; they can be wrong or incomplete, and OpenRouter receives the (masked) prompt regardless of which model is chosen. See Disclaimer below.
-- No `SECURITY.md` or private vulnerability-reporting channel configured for this repo yet.
 
 ## Disclaimer
 
