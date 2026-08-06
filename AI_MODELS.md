@@ -14,7 +14,7 @@ Model seçimi ve `.env` örnekleri: [README: AI analizi](README.md#ai-analizi-op
 
 | Severity | Beklenen bulgu |
 |----------|----------------|
-| **HIGH** | 24 Haziran 00:20-00:36: **4** ping-check flap + her seferinde DNS silme/ekleme |
+| **HIGH** | 24 Haziran 00:20–00:36: **4** ping-check flap + her seferinde DNS silme/ekleme |
 | **MEDIUM** | 23 Haziran ~08:59: WAN fiziksel düşüş, Modem hangup, **IP + default route kaybı**, toparlanma |
 | **LOW** | GigabitEthernet0/1 flap (24/25/26, 100FD), ndnproxy, WSD |
 
