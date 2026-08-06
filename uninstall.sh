@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# keencli kaldırma script'i — https://github.com/aethrox/keencli
+# keencli kaldırma script'i: https://github.com/aethrox/keencli
 set -euo pipefail
 
 BIN_DIR="${HOME}/.local/bin"
@@ -17,7 +17,7 @@ usage() {
   keencli kaldırma
 
   Kurulumu adım adım siler. Her öğe için ayrı onay sorulur.
-  Varsayılan yanıt hayırdır — Enter veya n ile iptal edilir.
+  Varsayılan yanıt hayırdır: Enter veya n ile iptal edilir.
 
   Kullanım:
     bash uninstall.sh

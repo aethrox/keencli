@@ -20,12 +20,12 @@ const SETUP_HELP: &str = "\
 \n\
 Yapılandırma\n\
 \n\
-[Kurulum — install.sh sonrası]\n\
+[Kurulum: install.sh sonrası]\n\
 - config  ~/.config/keencli/config.toml\n\
 - şifre   ~/.config/keencli/.env\n\
 - veri    ~/.local/share/keencli/outputs/\n\
 \n\
-[Geliştirme — repo içinden]\n\
+[Geliştirme: repo içinden]\n\
 - config  ./config.toml\n\
 - şifre   ./.env\n\
 - veri    ./outputs/\n\
@@ -42,7 +42,7 @@ Komut ayrıntısı: keencli <komut> --help\n";
 Keenetic router'dan veri çeker, outputs/ klasörüne kaydeder ve analiz eder.",
     after_help = SETUP_HELP,
     help_template = "\
-{version} — {about-with-newline}\n\
+{version}: {about-with-newline}\n\
 \n\
 Kullanım: {usage}\n\
 \n\
@@ -112,7 +112,7 @@ Fetch verisi yoksa hata verir.\n\
 2. IP/MAC/SSID maskeler, prompt_for_ai.txt üretir\n\
 3. API key varsa OpenRouter ile AI raporu yazar\n\
 \n\
-[Girdi — fetch -a ile oluşmuş olmalı]\n\
+[Girdi: fetch -a ile oluşmuş olmalı]\n\
 - system.json, interface_PPPoE0.json, pingcheck.json\n\
 - log.txt, wifi.json, mesh.json\n\
 \n\
@@ -120,7 +120,7 @@ Fetch verisi yoksa hata verir.\n\
 - prompt_for_ai.txt   (her zaman)\n\
 - ai_report_MODEL.md  (API key varsa)\n\
 \n\
-[AI — opsiyonel ortam değişkenleri]\n\
+[AI: opsiyonel ortam değişkenleri]\n\
 - OPENROUTER_API_KEY\n\
 - LLM_MODEL        önerilen: anthropic/claude-sonnet-4.6\n\
 - LLM_TEMPERATURE  opsiyonel, varsayılan 0.3 (0.0–2.0)\n\

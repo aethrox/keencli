@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# keencli kurulum script'i — https://github.com/aethrox/keencli
+# keencli kurulum script'i: https://github.com/aethrox/keencli
 set -euo pipefail
 
 REPO_URL="https://github.com/aethrox/keencli.git"
@@ -114,7 +114,7 @@ cmd "keencli fetch -a"
 cmd "keencli analyze"
 echo ""
 
-echo "  Opsiyonel — AI raporu için .env dosyasına ekleyin:"
+echo "  Opsiyonel: AI raporu için .env dosyasına ekleyin:"
 echo ""
 cmd "OPENROUTER_API_KEY=sk-or-..."
 cmd "LLM_MODEL=anthropic/claude-sonnet-4.6   # önerilen"

@@ -173,7 +173,7 @@ fn should_filter_out(line: &str, parsed: Option<&ParsedLine<'_>>) -> bool {
         return false;
     };
 
-    // Keenetic bazen syslog tarihini Jan 1 olarak yazar — kernel boot gürültüsü.
+    // Keenetic bazen syslog tarihini Jan 1 olarak yazar: kernel boot gürültüsü.
     if parsed.month == "Jan" && parsed.day == 1 && parsed.source == "kernel" {
         return true;
     }

@@ -6,7 +6,7 @@ keencli `analyze` çıktısı için OpenRouter modellerinin karşılaştırmalı
 **Prompt:** `prompt_for_ai.txt` (tüm modeller aynı girdi)  
 **Sıcaklık:** `LLM_TEMPERATURE` tanımlı değilse **0.3**
 
-Model seçimi ve `.env` örnekleri: [README — AI analizi](README.md#ai-analizi-opsiyonel)
+Model seçimi ve `.env` örnekleri: [README: AI analizi](README.md#ai-analizi-opsiyonel)
 
 ---
 
@@ -14,7 +14,7 @@ Model seçimi ve `.env` örnekleri: [README — AI analizi](README.md#ai-analizi
 
 | Severity | Beklenen bulgu |
 |----------|----------------|
-| **HIGH** | 24 Haziran 00:20–00:36: **4** ping-check flap + her seferinde DNS silme/ekleme |
+| **HIGH** | 24 Haziran 00:20-00:36: **4** ping-check flap + her seferinde DNS silme/ekleme |
 | **MEDIUM** | 23 Haziran ~08:59: WAN fiziksel düşüş, Modem hangup, **IP + default route kaybı**, toparlanma |
 | **LOW** | GigabitEthernet0/1 flap (24/25/26, 100FD), ndnproxy, WSD |
 
@@ -38,7 +38,7 @@ Model seçimi ve `.env` örnekleri: [README — AI analizi](README.md#ai-analizi
 
 | Model | Durum |
 |-------|--------|
-| `sakana/fugu-ultra` | OpenRouter 403 — hesap erişimi kapalı |
+| `sakana/fugu-ultra` | OpenRouter 403, hesap erişimi kapalı |
 
 ---
 
@@ -51,10 +51,10 @@ Model seçimi ve `.env` örnekleri: [README — AI analizi](README.md#ai-analizi
 | 4 ping-check flap | ✓ | ✓ | △ | △ | ✓ | ✳ | ✗ | ✗ | ✗ |
 | DNS korelasyonu | ✓ | ✓ | △ | ✗ | ✓ | △ | ✗ | ✗ | ✗ |
 | Jun 23 route/IP | ✓ | △ | ✓ | ✓ | △ | ✗ | ✗ | ✗ | ✓ |
-| LAN flap 26 Haz | ✓ | ✓ | ✓ | ✓ | — | ✓ | ✓ | ✓ | ✗ |
+| LAN flap 26 Haz | ✓ | ✓ | ✓ | ✓ | n/a | ✓ | ✓ | ✓ | ✗ |
 | Severity doğru | ✓ | ✓ | △ | △ | △ | ✗ | △ | ✗ | ✗ |
 
-✳ = yanlış severity · △ = kısmen · — = ayrı fetch klasöründe test
+✳ = yanlış severity · △ = kısmen · n/a = ayrı fetch klasöründe test
 
 ---
 
@@ -62,17 +62,17 @@ Model seçimi ve `.env` örnekleri: [README — AI analizi](README.md#ai-analizi
 
 ### `qwen/qwen3-235b-a22b`
 
-- **HIGH: none** — 24 Haziran 4 ping-check flap + DNS tamamen atlandı
-- Jun 23 hangup **MEDIUM**'da ama «route loss yok» — logda IP cleared + default route removed var
-- Özet'te «0 pingcheck failures» — geçmiş log flap'lerini yok sayıyor
+- **HIGH: none**: 24 Haziran 4 ping-check flap + DNS tamamen atlandı
+- Jun 23 hangup **MEDIUM**'da ama «route loss yok»; logda IP cleared + default route removed var
+- Özet'te «0 pingcheck failures»; geçmiş log flap'lerini yok sayıyor
 - LAN flap (24–26) ve ndnproxy/WSD **LOW**'da doğru
 - Büyük parametre sayısına rağmen GPT-4.1 / Grok ile benzer eksiklikler
 
 ### `openai/gpt-4.1`
 
-- **HIGH: none** — 4 flap + DNS prompt'a göre yanlış
+- **HIGH: none**: 4 flap + DNS prompt'a göre yanlış
 - Ping-check **LOW**'a indirildi
-- «Route loss yok» — logda IP cleared + default route removed var
+- «Route loss yok»; logda IP cleared + default route removed var
 - Formata ekstra system JSON eklendi
 
 ### `x-ai/grok-4.20` / `x-ai/grok-4.3`
@@ -97,4 +97,4 @@ cp outputs/.../ai_report_MODEL.md outputs/.../ai_report_MODEL-kopya.md
 
 ---
 
-*Son güncelleme: 2026-06-26 — keencli v1.0.6*
+*Son güncelleme: 2026-06-26, keencli v1.0.6*

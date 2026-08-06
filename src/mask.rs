@@ -1,4 +1,4 @@
-// IP, MAC ve SSID maskeleme — prompt ve outputs/ için ortak.
+// IP, MAC ve SSID maskeleme; prompt ve outputs/ için ortak.
 use regex::Regex;
 
 pub fn mask_sensitive(text: &str) -> String {

@@ -28,7 +28,7 @@ Rules:
 - Single Modem hangup that recovers without ping-check or route loss: MEDIUM at most.
 - HIGH/CRITICAL require correlated evidence (repeated hangups, ping-check flaps, or IP/route loss).
 - List each distinct issue as one bullet under its severity. If none, write "none".
-- Healthy mesh (online members, stable uplink) is not an issue — report mesh only for anomalies.
+- Healthy mesh (online members, stable uplink) is not an issue: report mesh only for anomalies.
 - ndnproxy/WSD [E] lines are LOW LAN noise, not WAN outages.
 
 Output format:

@@ -210,7 +210,7 @@ fn parse_uptime(system_json: &str) -> String {
         .unwrap_or_else(|| "bilinmiyor".to_string())
 }
 
-// Keenetic uptime'ı bazen sayı, bazen string döndürür — ikisini de dene.
+// Keenetic uptime'ı bazen sayı, bazen string döndürür: ikisini de dene.
 fn parse_uptime_seconds(value: &serde_json::Value) -> Option<u64> {
     value
         .as_u64()

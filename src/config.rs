@@ -4,7 +4,7 @@ use anyhow::{Context, Result};
 use serde::Deserialize;
 
 // `#[derive(Deserialize)]`: TOML alanlarını otomatik struct'a çevirir.
-// Şifre bilinçli olarak yok — yalnızca KEENETIC_PASSWORD ortam değişkeni kullanılır.
+// Şifre bilinçli olarak yok, yalnızca KEENETIC_PASSWORD ortam değişkeni kullanılır.
 #[derive(Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct RouterConfig {
@@ -13,7 +13,7 @@ pub struct RouterConfig {
 }
 
 pub fn load() -> Result<RouterConfig> {
-    // Yalnızca config.toml — KEENETIC_PASSWORD ayrı okunur (credentials.rs).
+    // Yalnızca config.toml; KEENETIC_PASSWORD ayrı okunur (credentials.rs).
     // Environment::with_prefix("KEENETIC") password alanını struct'a sızdırır; deny_unknown_fields reddeder.
     let config_path = paths::config_file();
     let config = config::Config::builder()
@@ -22,7 +22,7 @@ pub fn load() -> Result<RouterConfig> {
         .with_context(|| {
             format!(
                 "config.toml okunamadı (aranan: {}). \
-                 Kurulum için: ~/.config/keencli/config.toml — geliştirme için: ./config.toml",
+                 Kurulum için: ~/.config/keencli/config.toml, geliştirme için: ./config.toml",
                 config_path.display()
             )
         })?;
